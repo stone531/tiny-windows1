@@ -1,24 +1,33 @@
 #include "virusmanagerwindow.h"
 #include "ui_virusmanagerwindow.h"
 #include <QTableWidget>
-
+#include <QDateTime>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <qdebug.h>
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QInputDialog>
+#include <QPushButton>
 #include "common.h"
 #include "datamanager.h"
+#include <QMessageBox>
 
 VirusManagerWindow::VirusManagerWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::VirusManagerWindow)
 {
+    qDebug() << "病害管理窗口";
     ui->setupUi(this);
-    setWindowTitle("病毒管理窗口");
-    this->setFixedSize(1000, 500);
-    ui->tableWidget->setFixedSize(900, 300);
+    setWindowTitle("病害管理窗口");
+    //ui->horizontalLayout->setGeometry(QRect(100, 100, 600, 100));
+    //this->setFixedSize(900, 900);
+    this->setFixedSize(1200, 600);
+
+    ui->widget->setFixedSize(1100, 50);
+
+    ui->tableWidget->setFixedSize(1100, 300);
+
      connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(showAddDialog()));
 
      //QStandardItemModel model(5, 3);
@@ -89,7 +98,9 @@ void VirusManagerWindow::initTableWidget(QTableWidget *pTableWidget)
 
     //设置列头QHeaderView
     //tableWidget->setHorizontalHeaderLabels(DefaultHeaderDatas());//设置列标签
-    tableWidget->setHorizontalHeaderLabels({ "病害类型","病毒名称", "图片地址", "病害编码","病害级别","尺寸","位置","检测时间","处理状态"});
+
+    tableWidget->setHorizontalHeaderLabels({ "病害类型","病害名称", "图片地址", "病害编码","病害级别","尺寸","位置","检测时间","处理状态"});
+
     tableWidget->horizontalHeader()->setFont(font);//设置行字体
     tableWidget->horizontalHeader()->setDefaultSectionSize(100);//默认列宽
     tableWidget->horizontalHeader()->setStretchLastSection(true); //行头自适应表格
@@ -138,12 +149,16 @@ void VirusManagerWindow::QueryTable() {
         ui->tableWidget->setItem(RowCont,4,new QTableWidgetItem(CCommFunc::getVirusLevel(element->virLevel)));
         ui->tableWidget->setItem(RowCont,5,new QTableWidgetItem(element->virSize));
         ui->tableWidget->setItem(RowCont,6,new QTableWidgetItem(element->virLocal));
-        ui->tableWidget->setItem(RowCont,7,new QTableWidgetItem(element->virTime));
+
+        //qDebug()<<"aaaaaaaaaaaa time:"<<element->virTime;
+        ui->tableWidget->setItem(RowCont,7,new QTableWidgetItem(convertQStringValue(element->virTime)));
+
         ui->tableWidget->setItem(RowCont,8,new QTableWidgetItem(CCommFunc::getVirusStatus(element->virStatus)));
         if (element != nullptr) {
             delete element;
             element = nullptr;
         }
+
      }
 }
 
@@ -167,7 +182,8 @@ void VirusManagerWindow::receiveData(const int &virType,const QString &virName,c
     ui->tableWidget->setItem(row,4,new QTableWidgetItem(CCommFunc::getVirusLevel(virLevel)));
     ui->tableWidget->setItem(row,5,new QTableWidgetItem(virSize));
     ui->tableWidget->setItem(row,6,new QTableWidgetItem(virLocal));
-    ui->tableWidget->setItem(row,7,new QTableWidgetItem(virTime));
+
+    ui->tableWidget->setItem(row,7,new QTableWidgetItem(convertQStringValue(virTime)));
     ui->tableWidget->setItem(row,8,new QTableWidgetItem(CCommFunc::getVirusStatus(virStatus)));
 
     DataManager::GetInstance()->addVirusInfo(virType,virName,virPic,virNum,virLevel,virSize,virLocal,virTime,virStatus);
@@ -219,16 +235,53 @@ void VirusManagerWindow::deleteData() {
 
 void VirusManagerWindow::editData() {
     int currentRow = ui->tableWidget->currentRow();
-        if (currentRow != -1) { // 如果有行被选中
-            QTableWidgetItem *item = ui->tableWidget->item(currentRow, 0); // 获取当前选中行的第一列数据
-            if (item) {
-                bool ok;
-                QString newData = QInputDialog::getText(this, "Edit Data", "Enter new data:", QLineEdit::Normal, item->text(), &ok);
-                if (ok && !newData.isEmpty()) {
-                    item->setText(newData); // 更新表格中的数据
+    int currentCol = ui->tableWidget->currentColumn();
+
+    if (currentCol == 0 || currentCol == 3) {
+        QMessageBox msg;
+        msg.setText("禁止更新属性");
+        msg.exec();
+        return;
+    }
+    if (currentRow != -1) { // 如果有行被选中
+        QTableWidgetItem *item = ui->tableWidget->item(currentRow, currentCol); // 获取当前选中行的第一列数据
+        if (item) {
+            bool ok;
+            QString newData = QInputDialog::getText(this, "Edit Data", "请输入新的值:", QLineEdit::Normal, item->text(), &ok);
+            if (ok && !newData.isEmpty()) {
+                item->setText(newData); // 更新表格中的数据
+
+                //get numid
+                QTableWidgetItem *numItem = ui->tableWidget->item(currentRow, 3);
+                int virNum =numItem->text().toInt();
+
+                QString dbColName ="";
+                if(currentCol == 0) {
+                    dbColName ="virus_type";
+                } else if(currentCol == 1) {
+                    dbColName ="virus_name";
+                }else if(currentCol == 2) {
+                    dbColName ="pic";
+                }else if(currentCol == 3) {
+                    dbColName ="virus_num";
+                }else if(currentCol == 4) {
+                    dbColName ="virus_level";
+                }else if(currentCol == 5) {
+                    dbColName ="size";
+                }else if(currentCol == 6) {
+                    dbColName ="localtion";
+                }else if(currentCol == 7) {
+                    dbColName ="op_time";
+                }else if(currentCol == 8) {
+                    dbColName ="process_state";
+                } else {
+                    dbColName ="";
                 }
+
+                DataManager::GetInstance()->updateVirusItemValue(virNum,dbColName,newData);
             }
         }
+    }
 }
 
 int VirusManagerWindow::countNonEmptyCells(QTableWidget *tableWidget) {
@@ -248,6 +301,23 @@ int VirusManagerWindow::countNonEmptyCells(QTableWidget *tableWidget) {
 }
 
 void VirusManagerWindow::initComboboxData(){
+
+    ui->comboBox->setFixedHeight(30);
+    ui->comboBox_2->setFixedHeight(30);
+    ui->comboBox_2->setFixedWidth(140);
+
+    ui->comboBox_3->setFixedHeight(30);   
+    ui->findVir->setFixedHeight(30);
+    ui->pushButton_2->setFixedHeight(30);
+
+    ui->lineEdit->setFixedWidth(130);
+    ui->lineEdit->setFixedHeight(30);
+
+    ui->tableWidget->setColumnWidth(2, 250);
+    ui->tableWidget->setColumnWidth(2, 100);
+    ui->tableWidget->setColumnWidth(5, 50);
+    ui->tableWidget->setColumnWidth(7, 180);
+
     ui->comboBox->addItem("全部");
     ui->comboBox->addItem("裂缝");
     ui->comboBox->addItem("混泥土脱落");
@@ -267,7 +337,7 @@ void VirusManagerWindow::initComboboxData(){
     ui->comboBox_3->addItem("处理中");
     ui->comboBox_3->addItem("已完成");
 
-    ui->lineEdit->setText("病害名称");
+    ui->lineEdit->setPlaceholderText("请输病害名称");
 }
 
 void VirusManagerWindow::on_findVir_clicked()
@@ -305,11 +375,19 @@ void VirusManagerWindow::on_findVir_clicked()
         ui->tableWidget->setItem(RowCont,4,new QTableWidgetItem(CCommFunc::getVirusLevel(element->virLevel)));
         ui->tableWidget->setItem(RowCont,5,new QTableWidgetItem(element->virSize));
         ui->tableWidget->setItem(RowCont,6,new QTableWidgetItem(element->virLocal));
-        ui->tableWidget->setItem(RowCont,7,new QTableWidgetItem(element->virTime));
+
+        ui->tableWidget->setItem(RowCont,7,new QTableWidgetItem(convertQStringValue(element->virTime)));
         ui->tableWidget->setItem(RowCont,8,new QTableWidgetItem(CCommFunc::getVirusStatus(element->virStatus)));
         if (element != nullptr) {
             delete element;
             element = nullptr;
         }
      }
+
+}
+
+QString VirusManagerWindow::convertQStringValue(int timeValue) {
+    QDateTime dateTime = QDateTime::fromSecsSinceEpoch(timeValue);
+    QString formattedDateTime = dateTime.toString("yyyy/M/d hh:mm");
+    return formattedDateTime;
 }

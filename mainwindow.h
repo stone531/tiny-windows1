@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include "virusmanagerwindow.h"
 
+//#include "bridgemanager.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -32,6 +34,7 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_pushButton_5_clicked();
 private:
     void chongjiandashiCreate();
     void wanggedashiCreate();
@@ -39,6 +42,8 @@ private:
     void initLoading();
 
     void readFileConfig();
+
+    void initButtonSize();
 private:
     Ui::MainWindow *ui;
 
