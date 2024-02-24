@@ -1,5 +1,7 @@
 QT       += core gui sql
 
+#QMAKE_LFLAGS += /MANIFESTUAC:"level='requireAdministrator'uiAccess='false'"
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -14,9 +16,13 @@ SOURCES += \
     DataBase/mysqlhelper.cpp \
     DataBase/sqlitehelper.cpp \
     addvirusdialog.cpp \
+    bridgemanager.cpp \
+    buttondelegate.cpp \
     datamanager.cpp \
     main.cpp \
     mainwindow.cpp \
+    tablemodel.cpp \
+    tableview.cpp \
     virusmanagerwindow.cpp
 
 HEADERS += \
@@ -25,17 +31,23 @@ HEADERS += \
     DataBase/mysqlhelper.h \
     DataBase/sqlitehelper.h \
     addvirusdialog.h \
+    bridgemanager.h \
+    buttondelegate.h \
     common.h \
     datamanager.h \
     mainwindow.h \
+    tablemodel.h \
+    tableview.h \
     virusmanagerwindow.h
 
 FORMS += \
     addvirusdialog.ui \
+    bridgemanager.ui \
     mainwindow.ui \
     virusmanagerwindow.ui
 
 LIBS += -luser32
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

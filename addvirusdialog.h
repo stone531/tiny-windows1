@@ -37,6 +37,17 @@ private:
     void addVirusStatus();
 private:
     Ui::addVirusDialog *ui;
+
+signals:
+    void dataAdded(const int &virType,const QString &virName,const QString &virPic,
+                   const QString &virNum,const int &virLevel,const QString &virSize,
+                   const QString &virLocal,const int &virTime,const int &virStatus);
+
+//private slots:
+//    void onAddButtonClicked() {
+//        QString newData = "New Data"; // 获取新数据
+//        emit dataAdded(newData); // 发射信号通知父窗口添加数据
+//    }
 };
 
 #endif // ADDVIRUSDIALOG_H

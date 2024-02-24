@@ -11,9 +11,40 @@ addVirusDialog::addVirusDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowTitle("添加病毒-管理窗口");
+    setWindowTitle("添加病害-管理窗口");
 
-    setFixedSize(500, 700);
+    //parent->resize(600, 700);
+    //setFixedSize(400, 500);
+    this->setFixedSize(700, 700);
+
+    ui->comboBox_2->setFixedHeight(40);
+    ui->comboBox_3->setFixedHeight(40);
+    ui->comboBox_4->setFixedHeight(40);
+
+    ui->lineEdit->setFixedHeight(40);
+    ui->lineEdit_2->setFixedHeight(40);
+    ui->lineEdit_3->setFixedHeight(40);
+    ui->lineEdit_4->setFixedHeight(40);
+    ui->lineEdit_5->setFixedHeight(40);
+    ui->dateTimeEdit->setFixedHeight(40);
+
+    ui->pushButton->setFixedHeight(40);
+    ui->pushButton_2->setFixedHeight(40);
+    ui->formLayout->setVerticalSpacing(20); // 设置行间距为20像素
+    //ui->formLayout->SetFixedSize(900, 700);
+    //ui->formLayoutWidget->setFixedSize(700, 900);
+    ui->formLayoutWidget->resize(600, 600);
+
+
+    //ui->addVirusDialog->setFixedSize(900, 300);
+
+
+    //QVBoxLayout *layout = new QVBoxLayout(this);
+    //pushButton = new QPushButton("Add Data", this); // 创建按钮
+
+    //connect(ui->pushButton_2, &QPushButton::clicked, this, &addVirusDialog::on_pushButton_2_clicked);
+    //layout->addWidget(ui->pushButton_2);
+    //setLayout(layout);
 
     //设置初始值
     initData();
@@ -26,26 +57,29 @@ addVirusDialog::~addVirusDialog()
 
 void addVirusDialog::initData() {
     addVirusType();
-    ui->lineEdit->setText("请输入病毒名称");
-    ui->lineEdit_2->setText("请输入图片地址，支持多个图片地址中间以';'分开");
-    ui->lineEdit_3->setText("请输入病毒编码");
-    //ui->lineEdit_4->setText("请选择病毒级别");
-    ui->lineEdit_4->setText("请输入尺寸");
-    ui->lineEdit_5->setText("请输入位置");
+    ui->lineEdit->setPlaceholderText("请输入病害名称");
+    ui->lineEdit_2->setPlaceholderText("请输入图片地址，支持多个图片地址中间以';'分开");
+    ui->lineEdit_3->setPlaceholderText("请输入病害编码(必须数字)");
+    //ui->lineEdit_4->setText("请选择病害级别");
+    ui->lineEdit_4->setPlaceholderText("请输入尺寸");
+    ui->lineEdit_5->setPlaceholderText("请输入存储位置");
     //ui->lineEdit_6->setText("请选择时间");
     addVirusLevel();
     addVirusStatus();
+
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    ui->dateTimeEdit->setDateTime(currentDateTime);
 }
 void addVirusDialog::addVirusType() {
 
-    ui->comboBox->addItem("请选择病毒类型");
-    ui->comboBox->addItem("裂缝");
-    ui->comboBox->addItem("混泥土脱落");
-    ui->comboBox->addItem("渗水");
-    ui->comboBox->addItem("钢筋锈蚀");
-    ui->comboBox->addItem("桥面铺装破损");
-    ui->comboBox->addItem("桥面排水堵塞");
-    ui->comboBox->addItem("伸缩缝损坏");
+    ui->comboBox_4->addItem("请选择病害类型");
+    ui->comboBox_4->addItem("裂缝");
+    ui->comboBox_4->addItem("混泥土脱落");
+    ui->comboBox_4->addItem("渗水");
+    ui->comboBox_4->addItem("钢筋锈蚀");
+    ui->comboBox_4->addItem("桥面铺装破损");
+    ui->comboBox_4->addItem("桥面排水堵塞");
+    ui->comboBox_4->addItem("伸缩缝损坏");
 }
 
 void addVirusDialog::addVirusLevel() {
@@ -67,19 +101,20 @@ void addVirusDialog::addVirusStatus() {
 void addVirusDialog::on_pushButton_2_clicked()
 {
     //QMessageBox messageBox;
-    //病毒类型
-    m_virusType = ui->comboBox->currentIndex();
+    //病害类型
+    m_virusType = ui->comboBox_4->currentIndex();
     qDebug() << "m_virusType select Input Value: " << m_virusType;
     if(m_virusType == 0) {
-        QMessageBox::information(this, "添加", "请选择正确的病毒类型", QMessageBox::Ok);
+        QMessageBox::information(this, "添加", "请选择正确的病害类型", QMessageBox::Ok);
         return;
     }
+    QString virName= ui->comboBox_4->currentText();
 
-    //病毒名称
+    //病害名称
     m_virusName = ui->lineEdit->text();
     qDebug() << "m_virusName Input Value: " << m_virusName;
-    if(m_virusName.compare("请输入病毒名称") ==0) {
-        QMessageBox::information(this, "添加","请选择正确的病毒名称",  QMessageBox::Ok);
+    if(m_virusName.compare("请输入病害名称") ==0) {
+        QMessageBox::information(this, "添加","请选择正确的病害名称",  QMessageBox::Ok);
         return;
     }
 
@@ -93,7 +128,7 @@ void addVirusDialog::on_pushButton_2_clicked()
     //图片编码
     m_virusNum = ui->lineEdit_3->text();
     qDebug() << "m_virusNum Input Value: " << m_virusNum;
-    if(m_virusNum.compare("请输入病毒编码") ==0) {
+    if(m_virusNum.compare("请输入病害编码") ==0) {
         QMessageBox::information(this, "添加","请选择正确的图片编码",  QMessageBox::Ok);
         return;
     }
@@ -102,7 +137,7 @@ void addVirusDialog::on_pushButton_2_clicked()
     m_virusLevel = ui->comboBox_2->currentIndex();
     qDebug() << "m_virusLevel select Input Value: " << m_virusLevel;
     if(m_virusLevel == 0) {
-        QMessageBox::information(this, "添加","请选择正确的病毒级别", QMessageBox::Ok);
+        QMessageBox::information(this, "添加","请选择正确的病害级别", QMessageBox::Ok);
         return;
     }
 
@@ -125,6 +160,17 @@ void addVirusDialog::on_pushButton_2_clicked()
         QMessageBox::information(this, "添加","请选择正确的状态", QMessageBox::Ok);
         return;
     }
+
+    QDateTime dateTime = ui->dateTimeEdit->dateTime();
+    qint64 timeInSeconds = dateTime.toSecsSinceEpoch();
+    // 将 qint 类型的时间转换为 qint 类型
+    //qint timeInInt = static_cast<qint>(timeInSeconds);
+    emit dataAdded(m_virusType,m_virusName,m_virusPic,
+                   m_virusNum,m_virusLevel,m_virusSize,
+                   m_virusLocal,static_cast<int>(timeInSeconds),m_virusStatus);
+
+
+    close();
 }
 
 void addVirusDialog::on_pushButton_clicked()
