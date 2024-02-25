@@ -57,12 +57,8 @@ public:
     void delVirus(int sessionId);
     void clearRadioSession();
     std::vector<Virus_Detail*> queryAllVir();
-    void updateRadioSession(int sessionId,int pptId);
+    void updateVirusItemValue(int id,QString key,QString newValue);
     //int getPPtIdFromRadioSession(int sessionId);
-    std::vector<Virus_Detail*> queryVirByName(QString name);
-    std::vector<Virus_Detail*> queryVirByVirStatus(int virStatus);
-    std::vector<Virus_Detail*> queryVirByVirLevel(int virLevel);
-    std::vector<Virus_Detail*> queryVirByVirType(int virType);
     std::vector<Virus_Detail*> queryVirByVirCondition(int virType,int virLevel,int virStatus,QString name);
 ;
     //calllog

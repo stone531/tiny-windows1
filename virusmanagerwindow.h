@@ -33,6 +33,8 @@ private:
     int countNonEmptyCells(QTableWidget *tableWidget);
 
     void initComboboxData();
+
+    QString  convertQStringValue(int timeValue);
 private slots:
     void receiveData(const int &virType,const QString &virName,const QString &virPic,
                      const QString &virNum,const int &virLevel,const QString &virSize,
