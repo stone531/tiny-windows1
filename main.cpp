@@ -4,7 +4,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <Shlwapi.h>
-
+#include <qtextcodec.h>
 BOOL IsUserAnAdmin() {
     BOOL bAdmin = FALSE;
     SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
@@ -27,12 +27,15 @@ BOOL IsUserAnAdmin() {
 
 int main(int argc, char *argv[])
 {
+    // è®¾ç½®ç¼–ç æ ¼å¼ï¼Œåœ¨main()æ–¹æ³•ä¸­
+    QTextCodec* codec = QTextCodec::codecForName("utf-8");
+    QTextCodec::setCodecForLocale(codec);
     if (!IsUserAnAdmin()) {
-        // »ñÈ¡µ±Ç°¿ÉÖ´ĞĞÎÄ¼şµÄÂ·¾¶
+        // ??Ã¨?Î¼Â±?Â°?Ã©?â€²DD???tÎ¼??Â·??
         wchar_t szPath[MAX_PATH];
         GetModuleFileNameW(NULL, szPath, MAX_PATH);
 
-        // ÌáÉıÈ¨ÏŞÖØĞÂÔËĞĞµ±Ç°¿ÉÖ´ĞĞÎÄ¼ş
+        // Ã¬Ã¡Ã©yÃ¨Â¨?T??D???DDÎ¼Â±?Â°?Ã©?â€²DD???t
         if (ShellExecuteW(NULL, L"runas", szPath, NULL, NULL, SW_SHOWNORMAL) <= (HINSTANCE)32) {
             std::cout << "Error: Failed to elevate permissions." << std::endl;
             return 1;
@@ -44,5 +47,4 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
     return a.exec();
-
 }

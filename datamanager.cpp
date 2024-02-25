@@ -5,6 +5,7 @@
 
 #include "DataBase/dbconn.h"
 #include <QDebug>
+
 DataManager * DataManager::m_pDataManager = nullptr;
 
 DataManager::DataManager()
@@ -20,10 +21,8 @@ DataManager::~DataManager()
 bool DataManager::dbInit()
 {
     QList<QString> lstSql;
-    //lstSql.append("CREATE TABLE IF NOT EXISTS radio_action(id INTEGER PRIMARY KEY AUTOINCREMENT, begin_time INTEGER, end_time INTEGER, radio_name TEXT, radio_action TEXT, radio_rate TEXT, radio_account TEXT, radio_record_name TEXT, radio_upload TEXT '0')");
-    //lstSql.append("CREATE TABLE IF NOT EXISTS radio(id INTEGER PRIMARY KEY AUTOINCREMENT, is_listener INT DEFAULT 0, location INT DEFAULT 0, recv_send_same INT DEFAULT 0, couple_state INT DEFAULT 0, name TEXT DEFAULT '', rate TEXT DEFAULT '', recv_account TEXT DEFAULT '', recv_ip TEXT DEFAULT '', recv_port TEXT DEFAULT '', send_account TEXT DEFAULT '', send_ip TEXT DEFAULT '', send_port TEXT DEFAULT '')");
     lstSql.append("CREATE TABLE IF NOT EXISTS virus_info(id INTEGER DEFAULT 1 ,virus_type INTEGER, "
-                  "virus_name TEXT DEFAULT '',pic TEXT DEFAULT '',virus_num INTEGER PRIMARY KEY, virus_level INTEGER DEFAULT 0,"
+                  "virus_name TEXT DEFAULT '',pic TEXT DEFAULT '',virus_num INTEGER, virus_level INTEGER DEFAULT 0,"
                    "size TEXT ,localtion TEXT ,op_time INTEGER, process_state INTEGER, "
                   "options TEXT DEFAULT '')");
     Err_struct srt_err;
@@ -63,13 +62,16 @@ qint64 DataManager::GetCurrentUnixTime()
 }
 
 
-void DataManager::addRadioSession(int sessionId,int pptId,std::string client_req_type,std::string client_sip_host)
+void DataManager::addVirusInfo(int virType,QString virName,QString virPic,
+                                 QString virNum,int virLevel,QString virSize,
+                                 QString virLocal,int virTime,int virStatus)
 {
 
-    qint64 time = GetCurrentUnixTime();
+    //qint64 time = GetCurrentUnixTime();
 
-    QString preSql = QString("INSERT INTO radio_session(client_sip_host, session_id, ppt_id, client_req_type, op_time, opt) VALUES('%1', %2, %3, '%4', %5, '%6')")
-        .arg(client_sip_host.c_str()).arg(sessionId).arg(pptId).arg(client_req_type.c_str()).arg(time).arg("");
+    QString preSql = QString("INSERT INTO virus_info(virus_type,virus_name,pic,virus_num,virus_level,size,localtion,op_time,process_state) VALUES(%1, '%2', '%3', %4, '%5', '%6', '%7', %8, %9)")
+        .arg(virType).arg(virName).arg(virPic).arg(virNum).arg(virLevel).arg(virSize)
+            .arg(virLocal).arg(virTime).arg(virStatus);
 
     Err_struct srt_err;
 
@@ -79,16 +81,18 @@ void DataManager::addRadioSession(int sessionId,int pptId,std::string client_req
     dbhelper = dbconn.getDBConn();
     if (nullptr == dbhelper) return;
     dbhelper->execute_sql(preSql, srt_err);
+    qDebug() <<"addVirusInfo insert data success:"<<preSql;
 }
 
-void DataManager::updateRadioSession(int sessionId,int pptId)
+void DataManager::updateVirusItemValue(int id,QString key,QString newValue)
 {
-    if (sessionId <= 0 || pptId <=0 ) return;
+    if (key =="" || newValue == "" ) return;
 
     //if (getPPtIdFromRadioSession(sessionId) == pptId) return;
 
-    QString preSql = QString("UPDATE radio_session SET ppt_id = %1 WHERE session_id = %2 ").arg(pptId).arg(sessionId);
+    QString preSql = QString("UPDATE virus_info SET %1 = '%2' WHERE virus_num= %3 ").arg(key).arg(newValue).arg(id);
 
+    qDebug()<<preSql;
     Err_struct srt_err;
 
     DBHelper* dbhelper = nullptr;
@@ -99,9 +103,9 @@ void DataManager::updateRadioSession(int sessionId,int pptId)
     dbhelper->execute_sql(preSql, srt_err);
 }
 
-void DataManager::delRadioSession(int sessionId)
+void DataManager::delVirus(int virNum)
 {
-    QString preSql = QString("DELETE FROM radio_session WHERE session_id = %1 ").arg(sessionId);
+    QString preSql = QString("DELETE FROM virus_info WHERE virus_num = %1 ").arg(virNum);
 
     Err_struct srt_err;
 
@@ -111,6 +115,8 @@ void DataManager::delRadioSession(int sessionId)
     dbhelper = dbconn.getDBConn();
     if (nullptr == dbhelper) return;
     dbhelper->execute_sql(preSql, srt_err);
+
+    qDebug() <<"delVirus del  success:"<<preSql;
 }
 
 void DataManager::clearRadioSession()
@@ -127,9 +133,9 @@ void DataManager::clearRadioSession()
     dbhelper->execute_sql(preSql, srt_err);
 }
 
-std::string DataManager::queryAllRadioSession()
+std::vector<Virus_Detail*> DataManager::queryAllVir()
 {
-    QString preSql = QString("Select ppt_id,client_sip_host,client_req_type FROM radio_session ");
+    QString preSql = QString("Select virus_type,virus_name,pic,virus_num,virus_level,size,localtion,op_time,process_state FROM virus_info ");
     QList<QSqlRecord> lstQueryRecord;
     Err_struct srt_err;
 
@@ -137,44 +143,96 @@ std::string DataManager::queryAllRadioSession()
     DBHelper* dbhelper = nullptr;
     Err_struct srtErr;
     DBConn dbconn;
+    std::vector<Virus_Detail*> virInfos;
     dbhelper = dbconn.getDBConn();
-    if (nullptr == dbhelper) return nullptr;
+    if (nullptr == dbhelper) return virInfos;
     dbhelper->query(preSql, lstQueryRecord, srt_err);
-
-    std::string result = "\nfid:000.000\n";
 
     for (const auto &record: lstQueryRecord) {
-        result += record.value("ppt_id").toString().toStdString() + ","
-            + record.value("client_sip_host").toString().toStdString() + ","
-            + record.value("client_req_type").toString().toStdString() + "\n";
-    }
-    qDebug() << "当前查询结果:" << result.c_str() << endl;
 
-    return result;
+        Virus_Detail *tmpObj= new Virus_Detail;
+        tmpObj->virType = record.value("virus_type").toInt();
+        tmpObj->virName = record.value("virus_name").toString();
+        tmpObj->virPic = record.value("pic").toString();
+
+        tmpObj->virNum = record.value("virus_num").toString();
+        tmpObj->virLevel = record.value("virus_level").toInt();
+        tmpObj->virSize = record.value("size").toString();
+        tmpObj->virLocal = record.value("localtion").toString();
+        tmpObj->virTime = record.value("op_time").toInt();
+        tmpObj->virStatus = record.value("process_state").toInt();
+
+        virInfos.push_back(tmpObj);
+    }
+    //qDebug() << "当前查询结果:" << result.c_str() << endl;
+
+    return virInfos;
 }
 
-int DataManager::getPPtIdFromRadioSession(int sessionId)
-{
-    if (sessionId <= 0) return -1;
+std::vector<Virus_Detail*> DataManager::queryVirByVirCondition(int virType,int virLevel,int virStatus,QString name) {
+    if(virType == 0 &&virLevel ==0 &&virStatus ==0 &&name =="" ) {
+        return queryAllVir();
+    }
+    bool hasCondition = false;
 
-    QString preSql = QString("Select ppt_id FROM radio_session WHERE session_id = %1 ").arg(sessionId);
+    QString preSql = QString("Select virus_type,virus_name,pic,virus_num,virus_level,size,localtion,op_time,process_state FROM virus_info where  ");
+    if (virType != 0) {
+        preSql += " virus_type = '" + QString::number(virType) + "' ";
+        hasCondition = true;
+    }
+    if (virLevel != 0) {
+        if (hasCondition) {
+                preSql += " AND ";
+        }
+        preSql += " virus_level = '" + QString::number(virLevel) + "' ";
+        hasCondition = true;
+    }
 
+    if (virStatus != 0) {
+        if (hasCondition) {
+            preSql += " AND ";
+        }
+        preSql += " process_state = '" + QString::number(virStatus) + "' ";
+        hasCondition = true;
+    }
+    if (name != "") {
+        if (hasCondition) {
+            preSql += " AND ";
+        }
+        preSql += " virus_name = '" + name + "' ";
+    }
+
+    qDebug() << "条件查询:" << preSql << endl;
+
+    QList<QSqlRecord> lstQueryRecord;
     Err_struct srt_err;
 
     qDebug() << preSql;
     DBHelper* dbhelper = nullptr;
     Err_struct srtErr;
     DBConn dbconn;
+    std::vector<Virus_Detail*> virInfos;
     dbhelper = dbconn.getDBConn();
-    if (nullptr == dbhelper) return -2;
-
-    QList<QSqlRecord> lstQueryRecord;
+    if (nullptr == dbhelper) return virInfos;
     dbhelper->query(preSql, lstQueryRecord, srt_err);
 
-    if (lstQueryRecord.size() > 0)
-    {
-        return lstQueryRecord[0].value("ppt_id").toInt();
-    }
+    for (const auto &record: lstQueryRecord) {
 
-    return -3;
+        Virus_Detail *tmpObj= new Virus_Detail;
+        tmpObj->virType = record.value("virus_type").toInt();
+        tmpObj->virName = record.value("virus_name").toString();
+        tmpObj->virPic = record.value("pic").toString();
+
+        tmpObj->virNum = record.value("virus_num").toString();
+        tmpObj->virLevel = record.value("virus_level").toInt();
+        tmpObj->virSize = record.value("size").toString();
+        tmpObj->virLocal = record.value("localtion").toString();
+        tmpObj->virTime = record.value("op_time").toInt();
+        tmpObj->virStatus = record.value("process_state").toInt();
+
+        virInfos.push_back(tmpObj);
+    }
+    //qDebug() << "当前查询结果:" << result.c_str() << endl;
+
+    return virInfos;
 }

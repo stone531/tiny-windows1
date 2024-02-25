@@ -4,6 +4,8 @@
 
 #include <QMutex>
 #include <mutex>
+#include <vector>
+#include <common.h>
 
 class DataManager
 {
@@ -49,13 +51,16 @@ public:
     qint64 GetCurrentUnixTime();
 
     //radiosession
-    void addRadioSession(int sessionId, int pptId, std::string client_req_type, std::string client_sip_host);
-    void delRadioSession(int sessionId);
+    void addVirusInfo(int virType,QString virName,QString virPic,
+                      QString virNum,int virLevel,QString virSize,
+                      QString virLocal,int virTime,int virStatus);
+    void delVirus(int sessionId);
     void clearRadioSession();
-    std::string queryAllRadioSession();
-    void updateRadioSession(int sessionId,int pptId);
-    int getPPtIdFromRadioSession(int sessionId);
-
+    std::vector<Virus_Detail*> queryAllVir();
+    void updateVirusItemValue(int id,QString key,QString newValue);
+    //int getPPtIdFromRadioSession(int sessionId);
+    std::vector<Virus_Detail*> queryVirByVirCondition(int virType,int virLevel,int virStatus,QString name);
+;
     //calllog
 
 private:
