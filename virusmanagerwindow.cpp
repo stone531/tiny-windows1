@@ -2,7 +2,7 @@
 #include "ui_virusmanagerwindow.h"
 #include <QTableWidget>
 #include <QDateTime>
-#include <QVBoxLayout>
+
 #include <QWidget>
 #include <qdebug.h>
 #include <QContextMenuEvent>
@@ -26,7 +26,7 @@ VirusManagerWindow::VirusManagerWindow(QWidget *parent) :
 
     ui->widget->setFixedSize(1100, 50);
 
-    ui->tableWidget->setFixedSize(1100, 300);
+    ui->tableWidget->setFixedSize(1200, 200);
 
      connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(showAddDialog()));
 
@@ -51,11 +51,16 @@ VirusManagerWindow::VirusManagerWindow(QWidget *parent) :
         menu->popup(ui->tableWidget->viewport()->mapToGlobal(pos));
     });
 
-    setLayout(new QVBoxLayout(this));
+    QVBoxLayout *nlayout = new QVBoxLayout(this);
+    //setLayout(nlayout);
     layout()->addWidget(ui->tableWidget);
 
     QueryTable();
     initComboboxData();
+
+    //分页处理
+    tablewidgePageInit(nlayout);
+    //populateTable();
 }
 
 VirusManagerWindow::~VirusManagerWindow()
@@ -302,16 +307,23 @@ int VirusManagerWindow::countNonEmptyCells(QTableWidget *tableWidget) {
 
 void VirusManagerWindow::initComboboxData(){
 
-    ui->comboBox->setFixedHeight(30);
-    ui->comboBox_2->setFixedHeight(30);
+    ui->comboBox->setFixedHeight(40);
+    ui->comboBox->setFixedWidth(150);
+    ui->label->setFixedHeight(40);
+
+    ui->label_2->setFixedHeight(40);
+    ui->comboBox_2->setFixedHeight(40);
     ui->comboBox_2->setFixedWidth(140);
 
-    ui->comboBox_3->setFixedHeight(30);   
-    ui->findVir->setFixedHeight(30);
-    ui->pushButton_2->setFixedHeight(30);
+    ui->label_3->setFixedHeight(40);
+    ui->comboBox_3->setFixedHeight(40);
+    ui->findVir->setFixedHeight(35);
+    ui->findVir->setStyleSheet("background-color: blue;color: white;");
+    ui->pushButton_2->setFixedHeight(35);
+    ui->pushButton_2->setStyleSheet("background-color: blue;color: white;");
 
     ui->lineEdit->setFixedWidth(130);
-    ui->lineEdit->setFixedHeight(30);
+    ui->lineEdit->setFixedHeight(40);
 
     ui->tableWidget->setColumnWidth(2, 250);
     ui->tableWidget->setColumnWidth(2, 100);
@@ -390,4 +402,49 @@ QString VirusManagerWindow::convertQStringValue(int timeValue) {
     QDateTime dateTime = QDateTime::fromSecsSinceEpoch(timeValue);
     QString formattedDateTime = dateTime.toString("yyyy/M/d hh:mm");
     return formattedDateTime;
+}
+
+void VirusManagerWindow::tablewidgePageInit(QVBoxLayout *nlayout) {
+
+    nextButton = new QPushButton("Next");
+    prevButton = new QPushButton("Previous");
+    connect(nextButton, &QPushButton::clicked, this, &VirusManagerWindow::nextPage);
+    connect(prevButton, &QPushButton::clicked, this, &VirusManagerWindow::prevPage);
+
+    nlayout->addWidget(prevButton);
+    nlayout->addWidget(nextButton);
+    setLayout(nlayout);
+}
+void VirusManagerWindow::nextPage() {
+        currentPage++;
+        //populateTable();
+}
+
+void VirusManagerWindow::prevPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        //populateTable();
+    }
+}
+
+void VirusManagerWindow::populateTable() {
+    ui->tableWidget->setRowCount(pageSize);
+    ui->tableWidget->setColumnCount(2); // 假设有两列数据
+
+    // 假设data是一个包含所有数据的列表，此处只是示例
+    QList<QPair<QString, QString>> data = {
+        {"Data 1", "Value 1"},
+        {"Data 2", "Value 2"},
+        // 其他行数据
+    };
+
+    int startIndex = currentPage * pageSize;
+    int endIndex = qMin(startIndex + pageSize, data.size());
+
+    for (int i = startIndex; i < endIndex; ++i) {
+        QTableWidgetItem *item1 = new QTableWidgetItem(data[i].first);
+        QTableWidgetItem *item2 = new QTableWidgetItem(data[i].second);
+        ui->tableWidget->setItem(i % pageSize, 0, item1);
+        ui->tableWidget->setItem(i % pageSize, 1, item2);
+    }
 }

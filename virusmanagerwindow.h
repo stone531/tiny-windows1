@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <addvirusdialog.h>
 #include <QTableWidgetItem>
+#include <QVBoxLayout>
 namespace Ui {
 class VirusManagerWindow;
 }
@@ -35,6 +36,14 @@ private:
     void initComboboxData();
 
     QString  convertQStringValue(int timeValue);
+    void tablewidgePageInit(QVBoxLayout *nlayout);
+    QPushButton *nextButton;
+    QPushButton *prevButton;
+    void nextPage();
+    void prevPage();
+    void populateTable();
+    int currentPage;
+    int pageSize;
 private slots:
     void receiveData(const int &virType,const QString &virName,const QString &virPic,
                      const QString &virNum,const int &virLevel,const QString &virSize,

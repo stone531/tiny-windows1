@@ -11,10 +11,10 @@ addVirusDialog::addVirusDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowTitle("添加病害-管理窗口");
+    setWindowTitle("添加");
     //parent->resize(600, 700);
     //setFixedSize(400, 500);
-    this->setFixedSize(700, 700);
+    this->setFixedSize(700, 600);
 
     ui->comboBox_2->setFixedHeight(40);
     ui->comboBox_3->setFixedHeight(40);
@@ -28,11 +28,13 @@ addVirusDialog::addVirusDialog(QWidget *parent) :
     ui->dateTimeEdit->setFixedHeight(40);
 
     ui->pushButton->setFixedHeight(40);
+    ui->pushButton->setStyleSheet("background-color: gray;color: white;");
     ui->pushButton_2->setFixedHeight(40);
+    ui->pushButton_2->setStyleSheet("background-color: blue;color: white;");
     ui->formLayout->setVerticalSpacing(20); // 设置行间距为20像素
     //ui->formLayout->SetFixedSize(900, 700);
     //ui->formLayoutWidget->setFixedSize(700, 900);
-    ui->formLayoutWidget->resize(600, 600);
+    //ui->formLayoutWidget->resize(600, 600);
 
 
     //ui->addVirusDialog->setFixedSize(900, 300);

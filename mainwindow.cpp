@@ -65,13 +65,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     std::vector<Virus_Detail*> allV = DataManager::GetInstance()->queryAllVir();
     for(auto newButton : allV) {
-        QPushButton *tmpButton = new QPushButton(CCommFunc::getVirusType(newButton->virType));
+        QPushButton *tmpButton = new QPushButton(newButton->virName);
         ui->verticalLayout->addWidget(tmpButton);
         ui->verticalLayout->insertWidget(1, tmpButton);
         tmpButton->setFixedHeight(60);
         tmpButton->setFixedWidth(200);
         connect(tmpButton, &QPushButton::clicked, [=]() {
-            QMessageBox::information(this, CCommFunc::getVirusType(newButton->virType), "Button 1 was clicked!");
+            QMessageBox::information(this, newButton->virName, "Button 1 was clicked!");
         });
     }
     initButtonSize();
