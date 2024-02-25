@@ -31,13 +31,10 @@ HEADERS += \
     DataBase/mysqlhelper.h \
     DataBase/sqlitehelper.h \
     addvirusdialog.h \
-    #bridgemanager.h \
     #buttondelegate.h \
     common.h \
     datamanager.h \
     mainwindow.h \
-    #tablemodel.h \
-    #tableview.h \
     virusmanagerwindow.h
 
 FORMS += \
