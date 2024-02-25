@@ -15,6 +15,8 @@ class VirusManagerWindow : public QDialog
 public:
     explicit VirusManagerWindow(QWidget *parent = nullptr);
     ~VirusManagerWindow();
+protected:
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     void initTableWidget(QTableWidget *pTableWidget);
@@ -26,6 +28,18 @@ private:
     Ui::VirusManagerWindow *ui;
 
     addVirusDialog *m_addVirusDialog;
+
+    void addData(const QString &data);
+    int countNonEmptyCells(QTableWidget *tableWidget);
+
+    void initComboboxData();
+private slots:
+    void receiveData(const int &virType,const QString &virName,const QString &virPic,
+                     const QString &virNum,const int &virLevel,const QString &virSize,
+                     const QString &virLocal,const int &virTime,const int &virStatus);
+    void deleteData();
+    void editData();
+    void on_findVir_clicked();
 };
 
 #endif // VIRUSMANAGERWINDOW_H

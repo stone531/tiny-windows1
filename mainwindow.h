@@ -20,13 +20,17 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+//private slots:
+//    void startOpen();
 
 private slots:
-
+    void showNewWindow();
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
+
+
+    void on_pushButton_4_clicked();
 
 private:
     void chongjiandashiCreate();
@@ -34,11 +38,20 @@ private:
     void mofangCreate();
     void initLoading();
 
+    void readFileConfig();
 private:
     Ui::MainWindow *ui;
+
+    VirusManagerWindow *m_virusManager;
+    //QPushButton *m_pushButton_virusManager;
+    QVBoxLayout *m_layout;
+
+    QString pathfun = "../ModelFun/ModelFun.exe";
+    QString pathwange = "../GridMaster_V1.0.7/GridMaster.exe";
+    QString pathchongjian = "../g3d/G3D64.exe";
     QWidget* chongjiandashiContainer = nullptr;
     QWidget* wanggedashiContainer = nullptr;
     QWidget* mofangContainer = nullptr;
-    VirusManagerWindow *m_virusManager;
+
 };
 #endif // MAINWINDOW_H
